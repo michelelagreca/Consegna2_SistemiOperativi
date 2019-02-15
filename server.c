@@ -50,6 +50,7 @@ int register_users(int client, char *pass_serv);
 int opzioni(int client);
 int riempi_lista (char *decisione);
 void cerca_elemento(list lista1, list lista2, list *lista3, char *string);
+void invia_lista(list lista, int client);
 
 // MAIN
 
@@ -65,6 +66,7 @@ int main(){
 	char temp[200];
 	int esito, scelta_client;
 	int temp1;
+	char home[10]="/home";
 	
 	printf("Inserisci una password. Con questa password i client potranno connettersi.\n");
 	while(time_to_exit1==0){
@@ -90,7 +92,7 @@ int main(){
 		perror("Errore bind.\n");
 		exit(1);
 	}
-	listen(serv_sock, 10);
+	listen(serv_sock, 5);
 	
 	while(time_to_exit2==0){
 		len=sizeof(c);
@@ -121,40 +123,52 @@ int main(){
 				write(client_sock, "Hai scelto: Cerca file nella home.\n\nInserisci il nome del file da cercare: ", 100);
 				read(client_sock, temp, 100);
 				printf("Cerco '%s' nella home...\n", temp);
-				char temporan[100]="/home";
-				temp1=riempi_lista(temporan);
+				
+				temp1=riempi_lista(home);
 				if(temp1==-1)
 					break;
-				printf("Ho trovato i seguenti path name del file cercato:\n\n");
-				
+				char vuota[3]="\0";
 				cerca_elemento(lista_generale, lista_file, &lista_dei_trovati, temp);
-				stampa_lista(lista_dei_trovati);		
+				cancella(&lista_dei_trovati, vuota); 
+				printf("\nInvio la lista dei path trovati al client...\n");
+				write(client_sock, "\nLista dei path del file cercato:\n", 40);
+				read(client_sock, temp, 10);
+				memset(temp, 0, sizeof(temp));
+				invia_lista(lista_dei_trovati, client_sock);
+				printf("\nLista inviata.\n\n");	
 				lista_generale = NULL;
 				lista_file = NULL;
 				lista_dei_trovati=NULL;
 				break;
 				
 				case 2:
-				write(client_sock, "Hai scelto: Visualizza contenuto di una directory.\n\nInserisci il path della directory: ", 100);
+				write(client_sock, "Hai scelto: Visualizza i path dei file da una directory in giu'\n\nInserisci il path della directory: ", 150);
 				read(client_sock, temp, 100);
-				temp1=riempi_lista(temporan);
+				temp1=riempi_lista(temp);
 				if(temp1==-1)
 					break;
-				printf("\nLISTA:\n\n");
-				stampa_lista(lista_generale);
+				printf("\nInvio la lista al client...\n");
+				write(client_sock, "\nLista ricevuta dal server:\n\n", 30);
+				read(client_sock, temp, 10);
+				memset(temp, 0, sizeof(temp));
+				invia_lista(lista_generale, client_sock);
+				printf("\nLista inviata.\n\n");
 				lista_generale = NULL;
 				lista_file = NULL;
-				
 				break;
 				
 				case 3:
-				write(client_sock, "Hai scelto: Visualizza tutti i file dato un path.\n\nInserisci il path della directory: ", 100);
+				write(client_sock, "Hai scelto: Visualizza i file da una directory in giu'.\n\nInserisci il path della directory: ", 150);
 				read(client_sock, temp, 100);
-				temp1=riempi_lista(temporan);
+				temp1=riempi_lista(temp);
 				if(temp1==-1)
 					break;
-				printf("\nLISTA FILE:\n\n");
-				stampa_lista(lista_file);
+				printf("\nInvio la lista al client...\n");
+				write(client_sock, "\nLista ricevuta dal server:\n\n", 30);
+				read(client_sock, temp, 10);
+				memset(temp, 0, sizeof(temp));
+				invia_lista(lista_file, client_sock);
+				printf("\nLista inviata.\n\n");
 				lista_generale = NULL;
 				lista_file = NULL;
 				break;
@@ -175,6 +189,7 @@ int main(){
 				}
 				else{
 					printf("Chiusura Negata.\n\n");
+					esci_dal_ciclo=1;
 				}
 				
 				break;
@@ -290,13 +305,13 @@ int register_users(int client, char *pass_serv){
 
 int opzioni(int client){
 	int scelta;
-	write(client, "\n\n\nBenvenuto del menu' principale del server.\n\n1 - Cerca file nella home\n2 - Visualizza contenuto di una directory\n3 - Visualizza tutti i file dato un path\n4 - Esci\n5 - Chiudi Server ed esci\n\nInserisci il comando da eseguire: ", 300);
+	write(client, "\n\n\nBenvenuto del menu' principale del server.\n\n1 - Cerca file nella home\n2 - Visualizza i path dei file da una directory in giu'\n3 - Visualizza i file da una directory in giu'\n4 - Esci\n5 - Chiudi Server ed esci\n\nInserisci il comando da eseguire: ", 300);
 	read(client, &scelta, 10);
 	return scelta;
 	
 }
 
-void cerca_elemento(list lista1, list lista2, list *lista3, char *string){
+void cerca_elemento(list lista1, list lista2, list *lista3, char *string){	
 	list l1=lista1;
 	list l2=lista2;
 	list l3=NULL;
@@ -305,11 +320,30 @@ void cerca_elemento(list lista1, list lista2, list *lista3, char *string){
 		if(strcmp(string, l2->stringa)==0){
 			inserimento(&l3, l1->stringa);
 		}
+		
 		l1=l1->next;
 		l2=l2->next;
 	}
 	*lista3=l3;	
 }
+
+void invia_lista(list lista, int client){
+	
+	char stringa30[20];
+	list l1=lista;
+	
+	while(l1 != NULL){
+		write(client, l1->stringa, strlen(l1->stringa));
+		read(client, stringa30, 19);
+		memset(stringa30, 0, sizeof(stringa30));
+		l1=l1->next;
+	}
+	write(client, "finelista", 20);
+	read(client, stringa30, 19);
+	memset(stringa30, 0, sizeof(stringa30));
+	l1=NULL;
+}
+
 
 int riempi_lista (char *decisione){
 	
@@ -336,7 +370,7 @@ int riempi_lista (char *decisione){
 			
 		}
 	}
-	//closedir(open);
+
 	
 	int i, controllo;
 	int cores = get_nprocs_conf();
@@ -450,7 +484,7 @@ void *thread_function(void *args){
 						pthread_exit(NULL);
 					}
 				}
-				//closedir(open);
+				
 			}
 			
 		}
