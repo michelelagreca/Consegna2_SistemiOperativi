@@ -19,5 +19,4 @@ Il client all'avvio chiede l'inserimento di username e pass del server per poter
 Se accede, riceve dal server le opzioni e sceglie quella desiderata.
 
 DUBBI
-Non ho ben capito come deve avvenire il trasferimento di file da server  a client e come
-dovrei far stampare una lista di file trovati dal server al client.
+Non ho ben capito come deve avvenire il trasferimento di file da server a client 
