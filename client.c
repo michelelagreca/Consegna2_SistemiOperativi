@@ -32,7 +32,6 @@ int main(){
 	int scelta;
 	int n;
 	int fin=0;
-	int esci_dal_ciclo=0;
 
 	client_sock=socket(AF_INET, SOCK_STREAM, 0);
 	if(client_sock==-1){
@@ -61,12 +60,15 @@ int main(){
 	printf("%s\n", esito);//qui stampa se la connessione è avvenuta o no
 	read(client_sock, esito_num, 2);
 	sscanf(esito_num, "%d", &esito_formattato);
+	//printf("%d\n", esito_formattato);//qui stampa il codice di esito
 	if(esito_formattato==-1){
 		printf("Terminazione...\n");
 	}
 	else{
-		
-		while(esci_dal_ciclo==0){
+		int esci_dal_ciclo=0;
+		while(esci_dal_ciclo==0){			
+			//memset(stringa1, 0, sizeof(stringa1));
+			//memset(stringa2, 0, sizeof(stringa2));
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);
 			scanf("%d", &scelta);
@@ -80,11 +82,29 @@ int main(){
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);//stampo l'opzione che riceverò
 			memset(stringa1, 0, sizeof(stringa1));
+			memset(stringa2, 0, sizeof(stringa2));
 			scanf("%s", stringa2);
 			write(client_sock, stringa2, sizeof(stringa2));
 			memset(stringa2, 0, sizeof(stringa2));
+			read(client_sock, stringa1, 200);
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, strlen(stringa1));
+			write(client_sock, "r", 4);
+			while(fin==0){
+				read(client_sock, stringa1, 200);
+				if(strcmp(stringa1, "finelista") == 0){		
+					fin=1;
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				else{
+					printf("%s\n", stringa1);
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				write(client_sock, "ricev", 10);
+				
+			}
+			fin=0;
 			break;
-
 			case 2:
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);//stampo l'opzione che riceverò
@@ -93,15 +113,52 @@ int main(){
 			scanf("%s", stringa2);
 			write(client_sock, stringa2, sizeof(stringa2));
 			memset(stringa2, 0, sizeof(stringa2));
+			read(client_sock, stringa1, 200);
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, strlen(stringa1));
+			write(client_sock, "r", 4);
+			while(fin==0){
+				read(client_sock, stringa1, 200);
+				if(strcmp(stringa1, "finelista") == 0){		
+					fin=1;
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				else{
+					printf("%s\n", stringa1);
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				write(client_sock, "ricev", 10);
+				
+			}
+			fin=0;
 			break;
-
 			case 3:
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);//stampo l'opzione che riceverò
+			memset(stringa1, 0, sizeof(stringa1));
+			memset(stringa2, 0, sizeof(stringa2));
 			scanf("%s", stringa2);
 			write(client_sock, stringa2, sizeof(stringa2));
+			memset(stringa2, 0, sizeof(stringa2));
+			read(client_sock, stringa1, 200);
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, strlen(stringa1));
+			write(client_sock, "r", 4);
+			while(fin==0){
+				read(client_sock, stringa1, 200);
+				if(strcmp(stringa1, "finelista") == 0){		
+					fin=1;
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				else{
+					printf("%s\n", stringa1);
+					memset(stringa1, 0, strlen(stringa1));
+				}
+				write(client_sock, "ricev", 10);
+				
+			}
+			fin=0;
 			break;
-
 			case 4:
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);//stampo l'opzione che riceverò
