@@ -6,7 +6,6 @@ Descriverò nel modo più veloce e preciso l'implementazione.
 - SERVER
 Per prima cosa descriverò il server. AL primo accesso chiedrà di settare una password per potersi collegare coi client successivi.
 Dopo il settaggio, si mette in attesa (accept) di qualche client.
-Quando il client si connette inserendo la password corretta.
 Ho implementato uanche la possibilità di scegliere il funzionamento del server:
   - Manual mode, ossia la possibilita di approvare manualmente la richiesta di connessione da parte di un client (inserendo manul_mode come secondo parametro).
   - Default, ossia il server accetta qualsiasi tentativo di connessione da parte dei client (non inserendo nessun secondo       argomento).
