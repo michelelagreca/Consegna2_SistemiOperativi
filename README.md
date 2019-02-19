@@ -18,7 +18,7 @@ Il client puo decidere anche di scaricare uno dei file trovati in una qualsiasi 
 4- Il client esce
 5- Il client esce e manda un segnale di chiusura anche al server.
 
-CLIENT
+- CLIENT
 Il client all'avvio chiede l'inserimento di username e pass del server per potervi accedere.
 Se accede, riceve dal server le opzioni e sceglie quella desiderata.
 
