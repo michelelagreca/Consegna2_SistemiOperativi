@@ -11,11 +11,16 @@ Ho implementato uanche la possibilità di scegliere il funzionamento del server:
 - Manual mode, ossia la possibilita di approvare manualmente la richiesta di connessione da parte di un client (inserendo manul_mode come secondo parametro).
 - Default, ossia il server accetta qualsiasi tentativo di connessione da parte dei client (non inserendo nessun secondo       argomento).
 Quando la connessione è avvenuta, il server manda un menu al client con una write per far scegliere un operazione al client:
+
 1- Il server cerca nella home un file scelto dal client, di qualsiasi estensione, e manda una lista dei trovati al client.
 Il client puo decidere anche di scaricare uno dei file trovati in una qualsiasi cartella (solo per i file .txt)
+
 2- Il server stampa a video la lista dei path da una directory in giù
+
 3- Il server stampa a video i file da una directory in giu
+
 4- Il client esce
+
 5- Il client esce e manda un segnale di chiusura anche al server.
 
 - CLIENT
