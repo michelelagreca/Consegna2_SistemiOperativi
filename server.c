@@ -9,6 +9,7 @@
 #include <sys/sysinfo.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 
 // STRUTTURA LISTA
@@ -124,7 +125,7 @@ int main(int argc, char* argv[]){
 		perror("Errore bind.\n");
 		exit(1);
 	}
-	listen(serv_sock, 5);
+	listen(serv_sock, 100);
 	
 	while(time_to_exit2==0){
 		len=sizeof(c);
@@ -571,7 +572,7 @@ int riempi_lista (char *decisione){
 	char momentanea[200];
 	strcpy(momentanea, path);
 	strcat(momentanea, "/");
-	//inserimento(&lista_directory, path);
+	
 	DIR *open = opendir(path);
 	if(open==NULL){
 		perror("Errore apertura directory.\n");
