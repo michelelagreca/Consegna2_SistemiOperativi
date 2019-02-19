@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#include <arpa/inet.h>
 
 // STRUTTURA LISTA
 
@@ -40,7 +40,7 @@ int main(){
 		
 	s.sin_family=AF_INET;
 	s.sin_port=htons(11111);
-	s.sin_addr.s_addr=INADDR_ANY;
+	s.sin_addr.s_addr=inet_addr("127.0.0.1");
 	if(connect(client_sock, (struct sockaddr*)&s, sizeof(s))==-1){
 		perror("Errore connect.\n");
 		exit(1);
