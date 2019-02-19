@@ -19,7 +19,6 @@ typedef elemento* list;
 list lista_generale = NULL;
 
 int main(){
-	
 	int client_sock;
 	struct sockaddr_in s;	
 	char stringa1[100];
@@ -67,8 +66,8 @@ int main(){
 	else{
 		int esci_dal_ciclo=0;
 		while(esci_dal_ciclo==0){			
-			//memset(stringa1, 0, sizeof(stringa1));
-			//memset(stringa2, 0, sizeof(stringa2));
+			memset(stringa1, 0, sizeof(stringa1));
+			memset(stringa2, 0, sizeof(stringa2));
 			read(client_sock, stringa1, 300);
 			printf("%s", stringa1);
 			scanf("%d", &scelta);
@@ -76,7 +75,12 @@ int main(){
 			
 			switch(scelta){
 			default:
-			printf("La scelta effettuata non corrisponde a nessuna opzione del server.\n");
+			read(client_sock, stringa1, 300);
+			printf("%s", stringa1);//stampo l'opzione che riceverò
+			write(client_sock, "ricev", 10);
+			memset(stringa1, 0, sizeof(stringa1));
+			memset(stringa2, 0, sizeof(stringa2));
+			esci_dal_ciclo=1;
 			break;
 			case 1:
 			read(client_sock, stringa1, 300);
@@ -87,23 +91,61 @@ int main(){
 			write(client_sock, stringa2, sizeof(stringa2));
 			memset(stringa2, 0, sizeof(stringa2));
 			read(client_sock, stringa1, 200);
+			if(strcmp(stringa1, "Nessun elemento trovato")==0){
+				printf("%s\n", stringa1);
+				write(client_sock, "ricev", 10);
+				memset(stringa1, 0, sizeof(stringa1));
+				memset(stringa2, 0, sizeof(stringa2));
+				break;
+			}
 			printf("%s\n", stringa1);
-			memset(stringa1, 0, strlen(stringa1));
+			memset(stringa1, 0, sizeof(stringa1));
 			write(client_sock, "r", 4);
 			while(fin==0){
 				read(client_sock, stringa1, 200);
 				if(strcmp(stringa1, "finelista") == 0){		
 					fin=1;
-					memset(stringa1, 0, strlen(stringa1));
+					memset(stringa1, 0, sizeof(stringa1));
 				}
 				else{
 					printf("%s\n", stringa1);
-					memset(stringa1, 0, strlen(stringa1));
+					memset(stringa1, 0, sizeof(stringa1));
 				}
 				write(client_sock, "ricev", 10);
 				
 			}
 			fin=0;
+			read(client_sock, stringa1, 90);
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, sizeof(stringa1));
+			scanf("%s", stringa2);
+			write(client_sock, stringa2, sizeof(stringa2));
+			memset(stringa2, 0, sizeof(stringa2));
+			read(client_sock, stringa1, 90);
+			if(strcmp(stringa1, "Il file inserito non esiste")==0){
+				printf("%s\n", stringa1);
+				write(client_sock, "ricev", 10);
+				memset(stringa1, 0, sizeof(stringa1));
+				memset(stringa2, 0, sizeof(stringa2));
+				break;
+			}
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, sizeof(stringa1));
+			scanf("%s", stringa1);
+			write(client_sock, stringa1, sizeof(stringa1));
+			read(client_sock, stringa1, 300);
+			if(strcmp(stringa1, "La directory inserita non esiste")==0){
+				printf("%s\n", stringa1);
+				write(client_sock, "ricev", 10);
+				memset(stringa1, 0, sizeof(stringa1));
+				memset(stringa2, 0, sizeof(stringa2));
+				break;
+			}
+			printf("%s\n", stringa1);
+			memset(stringa1, 0, sizeof(stringa1));
+			memset(stringa2, 0, sizeof(stringa2));
+			write(client_sock, "ricevuto", 10);
+			
 			break;
 			case 2:
 			read(client_sock, stringa1, 300);
@@ -114,6 +156,13 @@ int main(){
 			write(client_sock, stringa2, sizeof(stringa2));
 			memset(stringa2, 0, sizeof(stringa2));
 			read(client_sock, stringa1, 200);
+			if(strcmp(stringa1, "La directory inserita non esiste")==0){
+				printf("%s\n", stringa1);
+				write(client_sock, "ricev", 10);
+				memset(stringa1, 0, sizeof(stringa1));
+				memset(stringa2, 0, sizeof(stringa2));
+				break;
+			}
 			printf("%s\n", stringa1);
 			memset(stringa1, 0, strlen(stringa1));
 			write(client_sock, "r", 4);
