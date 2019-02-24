@@ -1,3 +1,6 @@
+
+// VERS. 24/02/2019 22.25
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -55,6 +58,7 @@ int riempi_lista (char *decisione);
 void cerca_elemento(list lista1, list lista2, list *lista3, char *string);
 void invia_lista(list lista, int client);
 void copia_file(char path_esiste[200], char destinazione[200]);
+void copia_file2(char path_esiste[200], int c1);
 
 // MAIN
 
@@ -215,7 +219,7 @@ int main(int argc, char* argv[]){
 					lista_file = NULL;
 					lista_dei_trovati=NULL;
 					lista_directory=NULL;
-					l1==NULL;
+					l1=NULL;
 					break;
 				}
 				
@@ -258,8 +262,8 @@ int main(int argc, char* argv[]){
 					lista_file = NULL;
 					lista_dei_trovati=NULL;
 					lista_directory=NULL;
-					l1==NULL;
-					l2==NULL;
+					l1=NULL;
+					l2=NULL;
 					break;
 				}
 				h=0;
@@ -286,8 +290,8 @@ int main(int argc, char* argv[]){
 				lista_file = NULL;
 				lista_dei_trovati=NULL;
 				lista_directory=NULL;
-				l1==NULL;
-				l2==NULL;
+				l1=NULL;
+				l2=NULL;
 				break;
 				
 				case 2:
@@ -329,12 +333,333 @@ int main(int argc, char* argv[]){
 				break;
 				
 				case 4:
+				write(client_sock, "Hai scelto: Scarica file da server a client\n\nInserisci il nome del file da cercare: ", 100);
+				read(client_sock, temp, 100);
+				printf("Cerco '%s' nella home...\n", temp);
+				
+				temp1=riempi_lista(home);
+				if(temp1==-1)
+					break;
+				char vuota1[3]="\0";
+				cerca_elemento(lista_generale, lista_file, &lista_dei_trovati, temp);
+				cancella(&lista_dei_trovati, vuota1); 
+				if(lista_dei_trovati==NULL){
+					printf("Nessun elemento trovato.\n\n");
+					write(client_sock, "Nessun elemento trovato", 23);
+					read(client_sock, temp, 10);
+					memset(temp, 0, sizeof(temp));
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					break;
+				}
+				printf("\nInvio la lista dei path trovati al client...\n");
+				write(client_sock, "\nLista dei path del file cercato:\n", 40);
+				read(client_sock, temp, 10);
+				memset(temp, 0, sizeof(temp));
+				invia_lista(lista_dei_trovati, client_sock);
+				
+				printf("\nLista inviata.\n\n");	
+				write(client_sock, "\nInserisci il path del file da scaricare tra quelli trovati (solo con estensioni .txt): ", 90);
+				char path_da_scaricare2[100];
+				read(client_sock, path_da_scaricare2, 130);
+				list l10=lista_dei_trovati;
+				h=0;
+				w=0;
+				while(h==0){
+					while(l10!=NULL){
+						if(strcmp(l10->stringa, path_da_scaricare2)!=0){
+							l10=l10->next;
+							h=1;
+							w=1;
+						}
+						else{
+							l10=NULL;
+							h=1;
+							w=0;
+						}
+					}
+					
+				}
+				if(w==1){
+					printf("Il file inserito non esiste.\n\n");
+					write(client_sock, "Il file inserito non esiste", 27);
+					read(client_sock, temp, 20);
+					memset(temp, 0, sizeof(temp));
+					memset(path_da_scaricare2, 0, sizeof(path_da_scaricare2));
+						
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					l10=NULL;
+					break;
+				}
+				
+				h=0;
+				w=0;
+				write(client_sock, "\nInserisci la directory dove scaricare il file: ", 70);
+				char directory2[100];
+				read(client_sock, directory2, 130);
+				list l20=lista_directory;
+				
+				h=0;
+				w=0;
+				while(h==0){
+					while(l20!=NULL){
+						
+						if(strcmp(l20->stringa, directory2)!=0){
+							l20=l20->next;
+							h=1;
+							w=1;
+							
+						}
+						else{
+							l20=NULL;
+							h=1;
+							w=0;
+							
+						}
+					}
+					
+				}
+				if(w==1){
+					printf("La directory inserita non esiste.\n\n");
+					write(client_sock, "La directory inserita non esiste", 32);
+					read(client_sock, temp, 20);
+					memset(temp, 0, sizeof(temp));
+					memset(path_da_scaricare2, 0, sizeof(path_da_scaricare2));
+					memset(directory2, 0, sizeof(directory2));
+						
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					l10=NULL;
+					l20=NULL;
+					break;
+				}
+				h=0;
+				w=0;
+				char temp20[100];
+				strcpy(temp20, "\nScaricamento di ' ");
+				strcat(temp20, path_da_scaricare2);
+				strcat(temp20, " ' nella cartella ' ");
+				strcat(temp20, directory2);
+				strcat(temp20, " ' ...");
+				write(client_sock, temp20, sizeof(temp20));
+				read(client_sock, temp, 20);//leggo ricevuto
+				memset(temp, 0, sizeof(temp));
+				write(client_sock, directory2, sizeof(directory2));
+				read(client_sock, temp, 20);//leggo ricevuto
+				memset(temp, 0, sizeof(temp));
+				printf("\nTrasferimento del file ' %s ' in ' %s ' ...\n\n", path_da_scaricare2, directory2);
+				copia_file2(path_da_scaricare2, client_sock);
+				
+				printf("\nTrasferimento completato\n\n");
+				memset(temp, 0, sizeof(temp));
+				memset(temp2, 0, sizeof(temp20));
+				memset(path_da_scaricare2, 0, sizeof(path_da_scaricare2));
+				memset(directory2, 0, sizeof(directory2));
+				
+				lista_generale = NULL;
+				lista_file = NULL;
+				lista_dei_trovati=NULL;
+				lista_directory=NULL;
+				l10=NULL;
+				l20=NULL;
+				break;
+				
+				case 5:
+				write(client_sock, "Hai scelto: Carica file da client a server\n\nInserisci il nome del file da cercare: ", 100);
+				read(client_sock, temp, 100);
+				printf("Cerco '%s' nella home...\n", temp);
+				
+				temp1=riempi_lista(home);
+				if(temp1==-1)
+					break;
+				char vuota2[3]="\0";
+				cerca_elemento(lista_generale, lista_file, &lista_dei_trovati, temp);
+				cancella(&lista_dei_trovati, vuota2); 
+				if(lista_dei_trovati==NULL){
+					printf("Nessun elemento trovato.\n\n");
+					write(client_sock, "Nessun elemento trovato", 23);
+					read(client_sock, temp, 10);
+					memset(temp, 0, sizeof(temp));
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					break;
+				}
+				printf("\nInvio la lista dei path trovati al client...\n");
+				write(client_sock, "\nLista dei path del file cercato:\n", 40);
+				read(client_sock, temp, 10);
+				memset(temp, 0, sizeof(temp));
+				invia_lista(lista_dei_trovati, client_sock);
+				
+				printf("\nLista inviata.\n\n");	
+				write(client_sock, "\nInserisci il path del file da caricare tra quelli trovati (solo con estensioni .txt): ", 90);
+				char path_da_caricare[100];
+				read(client_sock, path_da_caricare, 130);
+				list l11=lista_dei_trovati;
+				h=0;
+				w=0;
+				while(h==0){
+					while(l11!=NULL){
+						if(strcmp(l11->stringa, path_da_caricare)!=0){
+							l11=l11->next;
+							h=1;
+							w=1;
+						}
+						else{
+							l11=NULL;
+							h=1;
+							w=0;
+						}
+					}
+					
+				}
+				if(w==1){
+					printf("Il file inserito non esiste.\n\n");
+					write(client_sock, "Il file inserito non esiste", 27);
+					read(client_sock, temp, 20);
+					memset(temp, 0, sizeof(temp));
+					memset(path_da_caricare, 0, sizeof(path_da_caricare));
+						
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					l11=NULL;
+					break;
+				}
+				
+				h=0;
+				w=0;
+				write(client_sock, "\nInserisci la directory dove caricare il file: ", 70);
+				char directory3[100];
+				read(client_sock, directory3, 130);
+				list l21=lista_directory;
+				
+				h=0;
+				w=0;
+				while(h==0){
+					while(l21!=NULL){
+						
+						if(strcmp(l21->stringa, directory3)!=0){
+							l21=l21->next;
+							h=1;
+							w=1;
+							
+						}
+						else{
+							l21=NULL;
+							h=1;
+							w=0;
+							
+						}
+					}
+					
+				}
+				if(w==1){
+					printf("La directory inserita non esiste.\n\n");
+					write(client_sock, "La directory inserita non esiste", 32);
+					read(client_sock, temp, 20);
+					memset(temp, 0, sizeof(temp));
+					memset(path_da_caricare, 0, sizeof(path_da_caricare));
+					memset(directory3, 0, sizeof(directory3));
+						
+					lista_generale = NULL;
+					lista_file = NULL;
+					lista_dei_trovati=NULL;
+					lista_directory=NULL;
+					l11=NULL;
+					l21=NULL;
+					break;
+				}
+				h=0;
+				w=0;
+				char temp21[100];
+				strcpy(temp21, "\nCaricamento di ' ");
+				strcat(temp21, path_da_caricare);
+				strcat(temp21, " ' nella cartella ' ");
+				strcat(temp21, directory3);
+				strcat(temp21, " ' ...");
+				
+				write(client_sock, temp21, sizeof(temp21));
+				
+				memset(temp21, 0, sizeof(temp21));
+				
+				char nomefile[200];
+				char path_nuovo[200];
+				int len=strlen(path_da_caricare)-1;
+				int i=0, j=len;
+				
+				
+				while(path_da_caricare[j] != '/'){
+					nomefile[i] = path_da_caricare[j];
+					i++;
+					j--;
+				}
+				for(i=0, j=strlen(nomefile)-1;i<strlen(nomefile)/2;i++, j--){
+					char temp=nomefile[i];
+					nomefile[i]=nomefile[j];
+					nomefile[j]=temp;
+				}
+				
+				
+				strcpy(path_nuovo, directory3);
+				strcat(path_nuovo, "/");
+				strcat(path_nuovo, nomefile);
+				FILE *nuovo = fopen(path_nuovo, "w");
+				
+				char temp56[100];
+				int escii=0;
+				while(escii==0) {
+			    		read(client_sock, temp56, 300);
+			    		if(strcmp(temp56, "fine")==0){
+			    			
+			    			memset(temp56, 0, sizeof(temp56));
+			    			write(client_sock, "ricevuto", 10);
+			    			escii=1;
+			    		}
+			    		else{
+				      		
+				      		fprintf(nuovo, "%s", temp56);
+				      		memset(temp56, 0, sizeof(temp56));
+				    		write(client_sock, "ricevuto", 10);
+			    		}
+			  	}
+				escii=0;
+			  	
+			  	fclose(nuovo);
+				
+				
+				
+				
+				printf("\nTrasferimento completato\n\n");
+				memset(temp, 0, sizeof(temp));
+				memset(temp2, 0, sizeof(temp20));
+				memset(path_da_scaricare2, 0, sizeof(path_da_scaricare2));
+				memset(directory2, 0, sizeof(directory2));
+				
+				lista_generale = NULL;
+				lista_file = NULL;
+				lista_dei_trovati=NULL;
+				lista_directory=NULL;
+				l10=NULL;
+				l20=NULL;
+				break;
+
+				case 6:
 				write(client_sock, "Hai scelto: Esci\n", 100);
 				esci_dal_ciclo=1;
 				
 				break;
 				
-				case 5:
+				case 7:
 				write(client_sock, "Hai scelto: Chiudi Server ed esci\n", 100);
 				printf("Il client '%s' ha le autorizzazioni necessarie per chiudere il server? [Y/N]: ", utente_client);
 				scanf("%s", temp);
@@ -482,7 +807,7 @@ int register_users(int client, char *pass_serv, int mode){
 
 int opzioni(int client){
 	int scelta;
-	write(client, "\n\n\nBenvenuto del menu' principale del server.\n\n1 - Cerca file nella home\n2 - Visualizza i path dei file da una directory in giu'\n3 - Visualizza i file da una directory in giu'\n4 - Esci\n5 - Chiudi Server ed esci\n\nInserisci il comando da eseguire: ", 300);
+	write(client, "\n\n\nBenvenuto del menu' principale del server.\n\n1 - Cerca file nella home\n2 - Visualizza i path dei file da una directory in giu'\n3 - Visualizza i file da una directory in giu'\n4 - Scarica file da server a client\n5 - Carica file da client a server\n6 - Esci\n7 - Chiudi Server ed esci\n\nInserisci il comando da eseguire: ", 320);
 	read(client, &scelta, 10);
 	return scelta;
 	
@@ -560,6 +885,38 @@ void copia_file(char path_esiste[200], char destinazione[200]){
 
   	fclose(esiste);
   	fclose(nuovo);
+	
+}
+
+void copia_file2(char path_esiste[200], int c1){
+	
+	char buff[200];
+	char t4[20];
+	char *res;
+	FILE *esiste = fopen(path_esiste, "r");
+	
+	int escii=0;
+	while(escii==0) {
+    		res=fgets(buff, 200, esiste);
+    		if(res==NULL ){
+      			
+      			write(c1, "fine", 4);
+      			read(c1, t4, 10);
+			memset(buff, 0, sizeof(buff));
+			memset(t4, 0, sizeof(t4));
+      			escii=1;
+      		}
+      		else{
+	      		
+	      		write(c1, buff, strlen(buff));
+			read(c1, t4, 10);
+			memset(buff, 0, sizeof(buff));
+			memset(t4, 0, sizeof(t4));
+		}
+    		
+  	}
+
+  	fclose(esiste);
 	
 }
 
